@@ -1,6 +1,6 @@
 export class ImageHelper {
   private canvas = document.createElement("canvas");
-  constructor(private image: ImageBitmapSource) {}
+  constructor(private image?: ImageBitmapSource) {}
 
   setImage(image: ImageBitmapSource) {
     this.image = image;
@@ -124,6 +124,7 @@ export class ImageHelper {
    * @returns
    */
   async toImageBitmap(sx?: number, sy?: number, sw?: number, sh?: number) {
+    if (!this.image) throw new Error("no avaliable image to process");
     if (
       sx !== undefined &&
       sy !== undefined &&
