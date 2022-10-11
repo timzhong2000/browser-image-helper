@@ -1,0 +1,20 @@
+{
+  "name": "browser-image-helper",
+  "version": "1.0.0",
+  "description": "a library for image format transform on browser",
+  "main": "index.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Tim-Zhong-2000",
+  "license": "Apache-2.0",
+  "licenses": [
+    {
+      "type": "Apache-2.0",
+      "url": "http://www.apache.org/licenses/LICENSE-2.0"
+    }
+  ],
+  "devDependencies": {
+    "@types/offscreencanvas": "^2019.7.0"
+  }
+}
