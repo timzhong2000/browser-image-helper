@@ -4,6 +4,10 @@ export interface CutConfig {
   width: number;
   height: number;
 }
+export interface QualityConfig {
+  type?: string | undefined;
+  quality?: number | undefined;
+}
 
 export class ImageHelper {
   /**
@@ -53,6 +57,13 @@ export class ImageHelper {
     return this;
   }
 
+  async getResolution() {
+    const imageBitmap = await this.toImageBitmap();
+    const { width, height } = imageBitmap;
+    imageBitmap.close();
+    return { width, height };
+  }
+
   /**
    * create OffscreenCanvas from ImageBitmap. your browser should support OffscreenCanvas!
    */
@@ -90,9 +101,10 @@ export class ImageHelper {
   async toFile(
     fileName: string,
     fileProperty?: FilePropertyBag,
-    options?: { type?: string | undefined; quality?: number | undefined },
+    options?: QualityConfig,
     cutConfig?: CutConfig
   ) {
+    if (this.image instanceof File) return this.image;
     const blob = await this.toBlob(options, cutConfig);
     return new File([blob], fileName, fileProperty);
   }
@@ -100,10 +112,7 @@ export class ImageHelper {
   /**
    * @param options image format and quality
    */
-  async toBlob(
-    options?: { type?: string | undefined; quality?: number | undefined },
-    cutConfig?: CutConfig
-  ): Promise<Blob> {
+  async toBlob(options?: QualityConfig, cutConfig?: CutConfig): Promise<Blob> {
     if (this.image instanceof Blob) return this.image;
     const { width, height } = await this.getResolution();
     cutConfig = cutConfig ?? {
@@ -112,7 +121,7 @@ export class ImageHelper {
       height: height,
       width: width,
     };
-    const { canvas } = await this.toOnscreenCanvas(cutConfig);
+    const { canvas } = this.toOnscreenCanvas(cutConfig);
     return new Promise((resolve, reject) =>
       canvas.toBlob(
         (blob) => (blob ? resolve(blob) : reject()),
@@ -132,7 +141,7 @@ export class ImageHelper {
       width: width,
     };
     const { startX: sx, startY: sy, width: sw, height: sh } = cutConfig;
-    const { context } = await this.toOnscreenCanvas(cutConfig);
+    const { context } = this.toOnscreenCanvas(cutConfig);
     const blob = context.getImageData(sx, sy, sw, sh);
     return blob;
   }
@@ -159,10 +168,20 @@ export class ImageHelper {
     }
   }
 
-  async getResolution() {
-    const imageBitmap = await this.toImageBitmap();
-    const { width, height } = imageBitmap;
-    imageBitmap.close();
-    return { width, height };
+  async toImageElement(options?: QualityConfig, cutConfig?: CutConfig) {
+    if (this.image instanceof HTMLImageElement) return this.image;
+    const { width, height } = await this.getResolution();
+    cutConfig = cutConfig ?? {
+      startX: 0,
+      startY: 0,
+      height: height,
+      width: width,
+    };
+    const { startX: sx, startY: sy, width: sw, height: sh } = cutConfig;
+    const imageElement = new Image(sw, sh);
+    imageElement.src = URL.createObjectURL(
+      await this.toBlob(options, cutConfig)
+    );
+    return imageElement;
   }
 }

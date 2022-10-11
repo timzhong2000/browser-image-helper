@@ -17,10 +17,13 @@ A library for image format transform on browser
 
 ### Supported Output Format
 
-- ImageBitmap
-- Blob
-- ImageData
-- File
+- HTMLImageElement (toImageElement)
+- HTMLCanvasElement (toOnscreenCanvas)
+- ImageBitmap (toImageBitmap)
+- Blob (toBlob)
+- ImageData (toImageData)
+- File (toFile)
+- OffscreenCanvas (toOffscreenCanvas) **Do not support Safari(16.1)!** [ SEE browser compatibility](https://caniuse.com/?search=OffscreenCanvas)
 
 ## Getting Started
 
