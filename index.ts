@@ -8,7 +8,7 @@ export class ImageHelper {
    * @param imageBitmap
    * @returns
    */
-  toOffscreenCanvas(imageBitmap: ImageBitmap) {
+  static toOffscreenCanvas(imageBitmap: ImageBitmap) {
     const { width, height } = imageBitmap;
     if (!window.OffscreenCanvas)
       throw new Error("browser does not support OffscreenCanvas");
@@ -23,7 +23,7 @@ export class ImageHelper {
     return { canvas: offscreenCanvas, context: ctx };
   }
 
-  toOnscreenCanvas(imageBitmap: ImageBitmap) {
+  static toOnscreenCanvas(imageBitmap: ImageBitmap) {
     const { width, height } = imageBitmap;
     const canvas = document.createElement("canvas");
     canvas.width = width;
@@ -80,7 +80,7 @@ export class ImageHelper {
   ): Promise<Blob> {
     if (this.image instanceof Blob) return this.image;
     const imageBitmap = await this.toImageBitmap(sx, sy, sw, sh);
-    const { canvas } = this.toOnscreenCanvas(imageBitmap);
+    const { canvas } = ImageHelper.toOnscreenCanvas(imageBitmap);
     return new Promise((resolve, reject) =>
       canvas.toBlob((blob) => (blob ? resolve(blob) : reject()))
     );
@@ -98,7 +98,7 @@ export class ImageHelper {
     if (this.image instanceof ImageData) return this.image;
     const imageBitmap = await this.toImageBitmap(sx, sy, sw, sh);
     const { width, height } = imageBitmap;
-    const { context } = this.toOnscreenCanvas(imageBitmap);
+    const { context } = ImageHelper.toOnscreenCanvas(imageBitmap);
     const blob = context.getImageData(
       sx ?? 0,
       sy ?? 0,
