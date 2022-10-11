@@ -31,12 +31,36 @@ pnpm install @timzhong2000/browser-image-helper
 
 ```
 
+normal use (immutable image)
+
 ```ts
 import { ImageHelper } from "@timzhong2000/browser-image-helper";
-const imgBlob = await fetch("IMAGE_URL").then((res) => res.blob());
-const imageHelper = new ImageHelper(imgBlob);
+
+const imageHelper = new ImageHelper(await fetchBlob());
+
 // to ImageBitmap
-const imageBitmap = imageHelper.toImageBitmap();
+const imageBitmap = await imageHelper.toImageBitmap();
+
 // to ImageData
-const imageData = imageHelper.toImageBitmap();
+const imageData = await imageHelper.toImageData();
+
+// select an area
+const imageDataWithCutArea = await imageHelper.toImageData(0, 0, 1920, 1080);
+```
+
+for performance (mutable image)
+
+```ts
+import { ImageHelper } from "@timzhong2000/browser-image-helper";
+
+const imageHelper = new ImageHelper(undefined, true);
+
+// to ImageData (first time SLOW!)
+imageHelper.setImage(await fetchBlob());
+const imageData1 = await imageHelper.toImageBitmap();
+
+// to ImageData (second time with zero-copy SUPER FAST!)
+imageHelper.setImage(await fetchAnotherBlob());
+const imageData2 = await imageHelper.toImageBitmap();
+// ...
 ```
