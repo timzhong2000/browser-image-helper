@@ -10,7 +10,7 @@ export class ImageHelper {
    * it can boost the performance if the image to be processed is mutable
    */
   private sharedCanvas = document.createElement("canvas");
-  private image: ImageBitmapSource;
+  private image?: ImageBitmapSource;
 
   constructor(image?: ImageBitmapSource, private mutable: boolean = false) {
     image && this.setImage(image);
@@ -62,6 +62,7 @@ export class ImageHelper {
     const { startX: sx, startY: sy, width: sw, height: sh } = cutConfig;
     const offscreenCanvas = new OffscreenCanvas(sw, sh);
     const context = ImageHelper.getContextInCPURam(offscreenCanvas);
+    if (!this.image) throw new Error("no avaliable image to process");
     ImageHelper.drawOnContext(this.image, context, sx, sy, sw, sh);
     return { canvas: offscreenCanvas, context: context };
   }
@@ -75,6 +76,7 @@ export class ImageHelper {
     canvas.width = sw;
     canvas.height = sh;
     const context = ImageHelper.getContextInCPURam(canvas);
+    if (!this.image) throw new Error("no avaliable image to process");
     ImageHelper.drawOnContext(this.image, context, sx, sy, sw, sh);
 
     return { canvas, context };
