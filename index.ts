@@ -8,9 +8,9 @@ export class ImageHelper {
    * @param imageBitmap
    * @returns
    */
-  private createOffscreenCanvasFromImageBitmap(imageBitmap: ImageBitmap) {
+  toOffscreenCanvas(imageBitmap: ImageBitmap) {
     const { width, height } = imageBitmap;
-    if (!OffscreenCanvas)
+    if (!window.OffscreenCanvas)
       throw new Error("browser does not support OffscreenCanvas");
     const offscreenCanvas = new OffscreenCanvas(width, height);
     const ctx = offscreenCanvas.getContext("2d", {
@@ -21,6 +21,21 @@ export class ImageHelper {
     if (!ctx) throw new Error("get RenderingContext2D failed");
     ctx.drawImage(imageBitmap, 0, 0);
     return { canvas: offscreenCanvas, context: ctx };
+  }
+
+  toOnscreenCanvas(imageBitmap: ImageBitmap) {
+    const { width, height } = imageBitmap;
+    const canvas = document.createElement("canvas");
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext("2d", {
+      alpha: false,
+      willReadFrequently: true,
+      desynchronized: false,
+    });
+    if (!ctx) throw new Error("get RenderingContext2D failed");
+    ctx.drawImage(imageBitmap, 0, 0);
+    return { canvas, context: ctx };
   }
 
   /**
@@ -65,9 +80,10 @@ export class ImageHelper {
   ): Promise<Blob> {
     if (this.image instanceof Blob) return this.image;
     const imageBitmap = await this.toImageBitmap(sx, sy, sw, sh);
-    const { canvas } = this.createOffscreenCanvasFromImageBitmap(imageBitmap);
-    const blob = await canvas.convertToBlob(options);
-    return blob;
+    const { canvas } = this.toOnscreenCanvas(imageBitmap);
+    return new Promise((resolve, reject) =>
+      canvas.toBlob((blob) => (blob ? resolve(blob) : reject()))
+    );
   }
 
   /**
@@ -82,7 +98,7 @@ export class ImageHelper {
     if (this.image instanceof ImageData) return this.image;
     const imageBitmap = await this.toImageBitmap(sx, sy, sw, sh);
     const { width, height } = imageBitmap;
-    const { context } = this.createOffscreenCanvasFromImageBitmap(imageBitmap);
+    const { context } = this.toOnscreenCanvas(imageBitmap);
     const blob = context.getImageData(
       sx ?? 0,
       sy ?? 0,
